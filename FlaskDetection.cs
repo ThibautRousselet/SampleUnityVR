@@ -4,27 +4,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using static FlaskAttributs;
 
-//Le but du jeu et de ramener des fioles de la couleur demandee
-//Cette classe permet de detecter le placement d une dans le recipient dediee 
-// A chaque fois que le joueur amene la bonne fiole, le score augmente de 1, la carte s' assombrit et des zombies apparaissent pour compliquer le jeu
-public class FlaskDetection : MonoBehaviour
+// The goal of the game is to bring flask of the correct color to a recipient while being chased by zombies
+// This script detects what kind of object the player is bringing back to the dedicated recipient
+// When the good flask is brought, the map gets darker and more zombies spawn
 {
     private Color targetColor;
-    private int score = 0; //nb de fioles ramenées
+    private int score = 0; //number of flasks brought
 
     public ZombieSpawn ZombieSpawn;
 
-    private Collider otherObj;//Collider de l objet place dans le recipient
+    private Collider otherObj; //Collider of the object in the recipient
 
     public GameObject HUD = null;
     private UnityEngine.UI.Text hudText = null;
 
-    public GameObject corridorLights; //Collection de GroupeLampes de chaque couloir
+    public GameObject corridorLights; //Collection of lamps from every corridors
     private List<GroupLamps> listCorridorLights = new List<GroupLamps>();
     public GroupLamps lobby;
     public GroupLamps room1;
     public GroupLampsEmergency emergencyLobby;
-    public GroupLampsEmergency secoursRoom1;
+    public GroupLampsEmergency emergencyRoom1;
 
     void Start()
     {
@@ -32,44 +31,43 @@ public class FlaskDetection : MonoBehaviour
         SetRandomTarget();
         ZombieSpawn = this.GetComponent<ZombieSpawn>();
 
-        //Place les groupes de lumieres dans une liste
         foreach (GroupLamps groupL in corridorLights.GetComponentsInChildren<GroupLamps>())
         {
             listCorridorLights.Add(groupL);
         }
     }
 
-    //Appelee quand un objet est placee dans le recipient
+    //Called when an object is put in the recipient
     private void OnTriggerEnter(Collider collider)
     {
         otherObj = collider;
-        Color otherColor = otherObj.gameObject.GetComponent<FlaskAttributs>().CouleurFiole;
+        Color otherColor = otherObj.gameObject.GetComponent<FlaskAttributs>().FlaskColor;
 
-        //Compare la couleur cible a celle de l'objet place
+        //Check if the flask has the right color
         if (targetColor == otherColor)
         {
             OnDetection();
         }
-        //On detruit l'objet dans tous les cas
+        //Object is then destroyed
         Destroy(otherObj.gameObject);
     }
 
     void Update()
     {
-        //On peut passer a la phase suivante en appuyant sur p pour tester
+        //Debug tool to automatically get to the next phase
         if (Input.GetKeyDown("p"))
         {
             OnDetection();
         }
     }
 
-    //On passe a la phase suivante quand la bonne fiole est ammenee
+    //Called when the right flask is brought
     private void OnDetection()
     {
-        score++;
+        score++; //Keep track of the number of flasks brought
         switch (score)
         {
-            //Chaque phase applique des modifications sur la map
+            //Every phase changes the map and make it more dangerous
             case 1:
                 Phase1();
                 break;
@@ -85,10 +83,9 @@ public class FlaskDetection : MonoBehaviour
         }
     }
 
-    //A chaque phase, on eteind plus de lumieres et on fait apparaitre des zombies
     private void Phase1()
     {
-        //Fait clignoter 3 couloirs
+        //Light in 3 corridors are blinking
         listCorridorLights[2].setBlink(true);
         listCorridorLights[3].setBlink(true);
         listCorridorLights[4].setBlink(true);
@@ -99,8 +96,8 @@ public class FlaskDetection : MonoBehaviour
 
     private void Phase2()
     {
-        //On eteint la salle 1
-        secoursRoom1.SetIntensity(1);
+        //Room 1 is shut down and emergency red lights are turned on
+        emergencyRoom1.SetIntensity(1);
         room1.SetIntensity(0);
 
         ZombieSpawn.zombieSpawn(15);
@@ -128,7 +125,7 @@ public class FlaskDetection : MonoBehaviour
 
     }
 
-    //Apres avoir ramene 3 fioles le joueur gagne
+    //After bringing 3 flasks, the player wins
     private void Phase4()
     {
         hudText.text = "YOU WIN";
@@ -140,14 +137,14 @@ public class FlaskDetection : MonoBehaviour
         hudText.text = "Objective : \n Bring a " + targetColor.ToString() + " Flask";
     }
 
-    //Choisi aleatoirement une couleur cible et l affiche
+    //Set a random target color and print it on screen
     private void SetRandomTarget()
     {
         targetColor = GenerateRandomColor();
         hudText.text = "Objective : \n Bring a " + targetColor.ToString() + " Flask";
     }
 
-    //Permet de generer une couleur aléatoire
+    //Generate a random color
     private Color GenerateRandomColor()
     {
         Color col;
