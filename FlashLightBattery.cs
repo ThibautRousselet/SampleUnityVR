@@ -4,7 +4,7 @@ using UnityEngine;
 using Valve.VR;
 
 //This script handles the battery and the light of the torchlight
-//The torchlight can be recharged by being shaked and has 3 possible states :
+//The torchlight can be recharged by being shaked and has 4 possible states :
 // - Recharge : The player is shaking the controller and battery increases, the light turns blue for 2 sec when the battery is full
 // - Overload : The player is pressing the overload button, the light becomes red and kill zombies in its range, battery consumtion increased
 // - Empty : The battery is empty, no more light
@@ -34,7 +34,7 @@ public class FlashlightBattery : MonoBehaviour
     {
         currentPos = this.transform.position;
 
-		//If overload button is pressed, the battery is consumed and light is red
+	//If overload button is pressed, the battery is consumed and light is red
         if (IsOverload.state && Battery>0)
         {
             Light.color = Color.red;
@@ -49,7 +49,7 @@ public class FlashlightBattery : MonoBehaviour
             {
                 Battery+=10;
             } 
-            //Si la batterie est pleine, la lumiere devient bleue
+            //If battery is full, light turns blue
             else if (timerMaxBatteriy <= 0)
             {
                 timerMaxBatteriy = 2;
@@ -58,21 +58,21 @@ public class FlashlightBattery : MonoBehaviour
             }
         } 
         else
-        //Sinon la lumiere est blanche
+        //Otherwise, regular white light
         {
             Light.color = Color.white;
             Light.intensity = 1;
         }
 
-        //On vide la batterie a chaque update
+        //Battery is consumed at each update
         Battery -= Time.deltaTime;
-        //On vide aleatoirement pour faire varier la duree de vie de la batterie
+        //The consumption is random so the player cant predict the battery duration
         if (Random.value > 0.995)
         {
             Battery--;
         }
 
-        //Plus de lumiere si la batterie est vide
+        //No more light if no battery
         if (Battery < 0)
         {
             Battery = 0;
@@ -84,7 +84,7 @@ public class FlashlightBattery : MonoBehaviour
             Light.enabled = true;
         }
 
-        //On met a jour les valeurs pour le prochain appel
+        //Update values for the next call
         previousPos = currentPos;
         timerMaxBatteriy -= Time.deltaTime;
     }
